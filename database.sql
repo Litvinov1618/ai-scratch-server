@@ -1,0 +1,6 @@
+CREATE DATABASE notes;
+
+CREATE TABLE notes(
+    id SERIAL PRIMARY KEY,
+    text TEXT
+);
