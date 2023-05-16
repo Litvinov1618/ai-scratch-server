@@ -41,10 +41,6 @@ const createEmbedding = async (text) => {
     return result.data.data[0].embedding;
 }
 
-//  TODO: 
-// - Add date calculating
-// - Fix date format (returning as string)
-
 // Routes
 
 // Set new note
