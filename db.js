@@ -1,11 +1,7 @@
 const Pool = require('pg').Pool;
 
 const pool = new Pool({
-    user: 'aleksandr-litvinov',
-    password: "8220",
-    host: 'localhost',
-    port: 5432,
-    database: 'ai_scratch_db'
+    connectionString: "postgres://default:OEQw6y0nhBWG@ep-twilight-wave-073761-pooler.us-east-1.postgres.vercel-storage.com:5432/verceldb?sslmode=require",
 });
 
 module.exports = pool;
