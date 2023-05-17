@@ -6,19 +6,7 @@ const {
     Configuration,
     OpenAIApi
 } = require('openai');
-
-const formatDate = (date) => {
-    const d = new Date(date);
-    const day = d.getDate();
-    const month = d.toLocaleString("default", { month: "short" });
-    const year = d.getFullYear();
-    const hours = d.getHours();
-    const minutes = d.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const formattedHours = hours % 12 || 12;
-    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-    return `${day} ${month} ${year}, ${formattedHours}:${formattedMinutes} ${ampm}`;
-};
+const formatDate = require('./formatDate');
 
 // Middleware
 app.use(cors());
@@ -54,7 +42,7 @@ app.post('/notes', async (req, res) => {
         const embedding = await createEmbedding(text);
 
         const newNote = await pool.query(
-            'INSERT INTO notes (embedding, text, date) VALUES($1::numeric[], $2, $3) RETURNING *',
+            'INSERT INTO notes (embedding, text, date) VALUES($1::numeric[], $2, $3) RETURNING id, text, date',
             [embedding, text, date]
         );
 
@@ -134,7 +122,7 @@ app.get('/notes/search', async (req, res) => {
 // Get all notes
 app.get('/notes', async (req, res) => {
     try {
-        const allNotes = await pool.query('SELECT * FROM notes');
+        const allNotes = await pool.query('SELECT id, text, date FROM notes');
         res.json(allNotes.rows);
     } catch (err) {
         res.json({
@@ -158,7 +146,7 @@ app.put('/notes/:id', async (req, res) => {
         const embedding = await createEmbedding(text);
 
         const updatedNotes = await pool.query(
-            'UPDATE notes SET text = $1, date = $2, embedding = $3::numeric[]::vector(1536) WHERE id = $4 RETURNING *',
+            'UPDATE notes SET text = $1, date = $2, embedding = $3::numeric[]::vector(1536) WHERE id = $4 RETURNING id, text, date',
             [text, date, embedding, id]
         );
 
@@ -177,7 +165,7 @@ app.delete('/notes/:id', async (req, res) => {
         const {
             id
         } = req.params;
-        const restOfNotes = await pool.query('DELETE FROM notes WHERE id = $1 RETURNING *', [id]);
+        const restOfNotes = await pool.query('DELETE FROM notes WHERE id = $1 RETURNING id, text, date', [id]);
         res.json(restOfNotes.rows);
     } catch (err) {
         res.json({
