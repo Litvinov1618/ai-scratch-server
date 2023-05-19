@@ -8,6 +8,10 @@ const {
 } = require('openai');
 const formatDate = require('./formatDate');
 
+// TODO:
+// - Split
+// - Fix problem with env variables (add different env variables for local and vercel)
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -122,7 +126,7 @@ app.get('/notes/search', async (req, res) => {
 // Get all notes
 app.get('/notes', async (req, res) => {
     try {
-        const allNotes = await pool.query('SELECT id, text, date FROM notes');
+        const allNotes = await pool.query('SELECT id, text, date FROM notes ORDER BY date DESC');
         res.json(allNotes.rows);
     } catch (err) {
         res.json({
@@ -176,5 +180,5 @@ app.delete('/notes/:id', async (req, res) => {
 });
 
 app.listen(5001, () => {
-    console.log('Server listening on port 5001');
+    console.log(`Server host on: http://localhost:5001`);
 });

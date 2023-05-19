@@ -2,5 +2,7 @@ CREATE DATABASE notes;
 
 CREATE TABLE notes(
     id SERIAL PRIMARY KEY,
-    text TEXT
+    text TEXT,
+    date BIGINT,
+    EMBEDDING VECTOR(1536)
 );
