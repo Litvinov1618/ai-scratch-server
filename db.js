@@ -15,6 +15,6 @@ const VERCEL_SERVER_SETTINGS = {
     connectionString: process.env.POSTGRES_URL + '?sslmode=require',
 };
 
-const pool = new Pool(VERCEL_SERVER_SETTINGS);
+const pool = new Pool(process.env.SERVER_MODE === 'local' ? LOCAL_SERVER_SETTINGS : VERCEL_SERVER_SETTINGS);
 
 module.exports = pool;

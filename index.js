@@ -41,13 +41,14 @@ app.post('/notes', async (req, res) => {
         const {
             text,
             date,
+            user_email
         } = req.body;
 
         const embedding = await createEmbedding(text);
 
         const newNote = await pool.query(
-            'INSERT INTO notes (embedding, text, date) VALUES($1::numeric[], $2, $3) RETURNING id, text, date',
-            [embedding, text, date]
+            'INSERT INTO notes (embedding, text, date, user_email) VALUES($1::numeric[], $2, $3, $4) RETURNING id, text, date, user_email',
+            [embedding, text, date, user_email]
         );
 
         res.json(newNote.rows[0]);
@@ -126,7 +127,13 @@ app.get('/notes/search', async (req, res) => {
 // Get all notes
 app.get('/notes', async (req, res) => {
     try {
-        const allNotes = await pool.query('SELECT id, text, date FROM notes ORDER BY date DESC');
+        const {
+            user_email
+        } = req.query;
+        const allNotes = await pool.query(
+            'SELECT id, text, date FROM notes WHERE user_email=$1 ORDER BY date DESC',
+            [user_email]
+        );
         res.json(allNotes.rows);
     } catch (err) {
         res.json({
