@@ -8,17 +8,14 @@ const router = express.Router();
 router.post('/', async (req, res) => {
     try {
         const {
-            text,
             date,
             user_email
         } = req.body;
 
-        const embedding = await createEmbedding(text);
-
         const newNote = await pool.query(
-            `INSERT INTO notes (embedding, text, date, user_email) VALUES($1::numeric[], $2, $3, $4)
+            `INSERT INTO notes (date, user_email) VALUES($1, $2)
             RETURNING id, text, date, user_email;`,
-            [embedding, text, date, user_email]
+            [date, user_email]
         );
 
         res.json(newNote.rows[0]);
