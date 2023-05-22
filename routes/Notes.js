@@ -33,25 +33,25 @@ router.post('/', async (req, res) => {
 // Search notes by query
 router.get('/search', async (req, res) => {
     try {
-        const { searchValue } = req.query;
+        const { search_value, user_email } = req.query;
 
-        if (!searchValue) {
+        if (!search_value) {
             return res.json({
                 error: 'No search value provided'
             });
         }
 
-        const embedding = await createEmbedding(searchValue);
+        const embedding = await createEmbedding(search_value);
         const cosineSimilarityThreshold = process.env.COSINE_SIMILARITY_THRESHOLD;
 
         const result = await pool.query(
             `SELECT text, date, id
             FROM notes
-            WHERE 1 - (embedding <=> $1::numeric[]::vector(1536)) >= $2;`,
-            [embedding, cosineSimilarityThreshold]
+            WHERE user_email=$1 AND 1 - (embedding <=> $2::numeric[]::vector(1536)) >= $3;`,
+            [user_email, embedding, cosineSimilarityThreshold]
         );
 
-        const aiResponse = await createAiSearchResponse(searchValue, result.rows);
+        const aiResponse = await createAiSearchResponse(search_value, result.rows);
 
         res.json({ posts: result.rows, aiResponse });
     } catch (err) {
@@ -69,7 +69,7 @@ router.get('/', async (req, res) => {
             user_email
         } = req.query;
         const allNotes = await pool.query(
-            `SELECT id, text, date FROM notes
+            `SELECT id, text, date, delta FROM notes
             WHERE user_email=$1 ORDER BY date DESC;`,
             [user_email]
         );
@@ -90,15 +90,16 @@ router.put('/:id', async (req, res) => {
         } = req.params;
         const {
             text,
+            delta,
             date,
         } = req.body;
 
         const embedding = await createEmbedding(text);
 
         const updatedNotes = await pool.query(
-            `UPDATE notes SET text = $1, date = $2, embedding = $3::numeric[]::vector(1536)
+            `UPDATE notes SET text = $1, date = $2, embedding = $3::numeric[]::vector(1536), delta = $5
             WHERE id = $4 RETURNING id, text, date;`,
-            [text, date, embedding, id]
+            [text, date, embedding, id, delta]
         );
 
         res.json(updatedNotes.rows);

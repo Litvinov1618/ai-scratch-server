@@ -9,7 +9,7 @@ const createAiSearchResponse = async (searchValue, notes) => {
             {
                 role: "system",
                 content:
-                    "You need to give a human-like answer for search request based on given notes. If notes doesn't includes right answer or not enough information, say 'I don't know'. Use only 1-5 sentences in answer.",
+                    `You need to give a human-like answer for search request based on given notes. If notes doesn't includes right answer or not enough information, say "Sorry, but I can't help". Use only 1-5 sentences in answer.`,
             },
             {
                 role: "user",
@@ -17,7 +17,7 @@ const createAiSearchResponse = async (searchValue, notes) => {
             },
             {
                 role: "assistant",
-                content: "Adam's birthday is on 4th July",
+                content: `Adam's birthday is on 4th July`,
             },
 
             {
@@ -26,7 +26,7 @@ const createAiSearchResponse = async (searchValue, notes) => {
             },
             {
                 role: "assistant",
-                content: "You were in cinema watching 'Dark Knight' movie",
+                content: `You were in cinema watching 'Dark Knight' movie`,
             },
             {
                 role: "user",
