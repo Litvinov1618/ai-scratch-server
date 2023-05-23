@@ -44,7 +44,7 @@ router.get('/search', async (req, res) => {
         const result = await pool.query(
             `SELECT text, date, id
             FROM notes
-            WHERE user_email=$1 AND 1 - (embedding <=> $2::numeric[]::vector(1536)) >= $3;`,
+            WHERE user_email=$1 AND (1 - (embedding <=> $2::numeric[]::vector(1536))) >= $3;`,
             [user_email, embedding, cosineSimilarityThreshold]
         );
 
