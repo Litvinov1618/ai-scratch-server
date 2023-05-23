@@ -5,12 +5,12 @@ const createAiSearchResponse = async (searchValue, notes) => {
     const result = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
         temperature: 0.7,
-        max_tokens: 200,
+        max_tokens: 1000,
         messages: [
             {
                 role: "system",
                 content:
-                    `You need to give a human-like answer for search request based on given notes. If notes doesn't includes right answer or not enough information, say "Sorry, but I can't help".`,
+                    `You need to give a human-like answer for search request based on given notes. If notes doesn't includes right answer or not enough information, say "Sorry, but I can't help". Maximum length of the answer is 100 characters.`,
             },
             {
                 role: "user",
