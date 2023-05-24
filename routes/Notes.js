@@ -50,7 +50,7 @@ router.get('/search', async (req, res) => {
 
         const aiResponse = await createAiSearchResponse(search_value, result.rows);
 
-        res.json({ posts: result.rows, aiResponse });
+        res.json({ notes: result.rows, aiResponse });
     } catch (err) {
         res.json({
             error: err.message
