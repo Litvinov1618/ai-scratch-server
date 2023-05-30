@@ -31,7 +31,7 @@ const createAiSearchResponse = async (searchValue, notes) => {
             },
             {
                 role: "user",
-                content: `Question: ${searchValue} Notes: ${notes
+                content: `Question: ${searchValue} Current Date: ${formatDate(Date.now())} Notes: ${notes
                     .map((note, index) => `${index + 1}. Date: ${formatDate(+note.date)} Text: ${note.text}`)
                     .join(" ")}`,
             },
