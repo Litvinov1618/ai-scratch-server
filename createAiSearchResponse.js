@@ -14,7 +14,7 @@ const createAiSearchResponse = async (searchValue, notes) => {
             },
             {
                 role: "user",
-                content: `Question: Adam's birthday? Notes: 1. Date: 9 Oct 2023, 2:00 PM Text: Mom's birthday 6th may 2. Date: 9 Oct 2023, 2:10 PM Text: Happy Birthday to you song need to download 3. Date: 2 Oct 2023, 2:00 PM Text: Adam's Birthday: 04/07/1990`,
+                content: `Question: Adam's birthday? Current Date: 2 Sep 2023 04:00 PM Notes: 1. Date: 9 Oct 2023, 2:00 PM Text: Mom's birthday 6th may 2. Date: 9 Oct 2023, 2:10 PM Text: Happy Birthday to you song need to download 3. Date: 2 Oct 2023, 2:00 PM Text: Adam's Birthday: 04/07/1990`,
             },
             {
                 role: "assistant",
@@ -23,7 +23,7 @@ const createAiSearchResponse = async (searchValue, notes) => {
 
             {
                 role: "user",
-                content: `Question: Where I was 9th October? Notes: 1. Date: 9 Oct 2023, 2:00 PM Text: "Dark Knight" is amazing movie! 2. Date: 9 May 2023, 2:10 PM Text: Bacca coffee is amazing place, need to return soon 3. Date: 2 Oct 2023, 2:00 PM Text: Adam's Birthday: 04/07/1990`,
+                content: `Question: Where I was 9th October? Current Date: 1 Aug 2023 11:00 AM Notes: 1. Date: 9 Oct 2023, 2:00 PM Text: "Dark Knight" is amazing movie! 2. Date: 9 May 2023, 2:10 PM Text: Bacca coffee is amazing place, need to return soon 3. Date: 2 Oct 2023, 2:00 PM Text: Adam's Birthday: 04/07/1990`,
             },
             {
                 role: "assistant",

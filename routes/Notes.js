@@ -2,6 +2,7 @@ const express = require('express');
 const createAiSearchResponse = require('../createAiSearchResponse');
 const createEmbedding = require('../createEmbedding');
 const pool = require('../db');
+const aiResponseErrorHandler = require('../aiResponseErrorHandler');
 const router = express.Router();
 
 // Set new note
@@ -29,15 +30,32 @@ router.post('/', async (req, res) => {
 
 // Search notes by query
 router.get('/search', async (req, res) => {
+    let notes = [];
+    let aiResponse = "";
+
+    const { search_value, user_email } = req.query;
+
+    if (!user_email) {
+        res.json({
+            error: 'No user email provided',
+            notes: [],
+            aiResponse,
+        });
+
+        return;
+    }
+
+    if (!search_value) {
+        res.json({
+            error: 'No search value provided',
+            notes: [],
+            aiResponse,
+        });
+
+        return;
+    }
+
     try {
-        const { search_value, user_email } = req.query;
-
-        if (!search_value) {
-            return res.json({
-                error: 'No search value provided'
-            });
-        }
-
         const embedding = await createEmbedding(search_value);
         const cosineSimilarityThreshold = process.env.COSINE_SIMILARITY_THRESHOLD;
 
@@ -48,15 +66,59 @@ router.get('/search', async (req, res) => {
             [user_email, embedding, cosineSimilarityThreshold]
         );
 
-        const aiResponse = await createAiSearchResponse(search_value, result.rows);
-
-        res.json({ notes: result.rows, aiResponse });
+        notes = result?.rows || [];
     } catch (err) {
-        res.json({
-            error: err.message
-        });
+        if (err?.response?.config?.url.includes('openai')) {
+            const message = aiResponseErrorHandler(err.response);
+
+            console.error(err.response.status, err.response.data);
+            res.json({
+                error: message,
+                notes,
+                aiResponse,
+            });
+
+            return;
+        }
+
         console.error(err.message);
+        res.json({
+            error: err.message,
+            notes,
+            aiResponse,
+        });
+
+        return;
     }
+
+    if (notes.length === 0) {
+        res.json({
+            notes,
+            aiResponse,
+        });
+        
+        return;
+    }
+
+    try {
+        aiResponse = await createAiSearchResponse(search_value, notes) || "";
+    } catch (err) {
+        const message = aiResponseErrorHandler(err.response);
+
+        console.error(err.response.status, err.response.data);
+        res.json({
+            notes,
+            error: message,
+            aiResponse,
+        });
+
+        return;
+    }
+
+    res.json({
+        notes,
+        aiResponse
+    });
 });
 
 // Get all notes
@@ -101,6 +163,15 @@ router.put('/:id', async (req, res) => {
 
         res.json(updatedNotes.rows);
     } catch (err) {
+        if (err?.response?.config?.url.includes('openai')) {
+            res.json({
+                error: `OpenAI API error. Code: ${err.response.status}, Message Code: ${err.response.data.code}, Message: ${err.response.data.message}`
+            });
+
+            console.error(err.response.status, err.response.data);
+            return;
+        }
+
         res.json({
             error: err.message
         });
