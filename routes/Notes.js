@@ -3,6 +3,8 @@ const createAiSearchResponse = require('../createAiSearchResponse');
 const createEmbedding = require('../createEmbedding');
 const pool = require('../db');
 const aiResponseErrorHandler = require('../aiResponseErrorHandler');
+const handleError = require('../handleError');
+
 const router = express.Router();
 
 // Set new note
@@ -21,10 +23,7 @@ router.post('/', async (req, res) => {
 
         res.json(newNote.rows[0]);
     } catch (err) {
-        res.json({
-            error: err.message
-        });
-        console.error(err.message);
+        handleError(err, res);
     }
 });
 
@@ -33,7 +32,7 @@ router.get('/search', async (req, res) => {
     let notes = [];
     let aiResponse = "";
 
-    const { search_value, user_email } = req.query;
+    const { search_value, user_email, ai_response_temperature, notes_similarity_threshold } = req.query;
 
     if (!user_email) {
         res.json({
@@ -57,13 +56,15 @@ router.get('/search', async (req, res) => {
 
     try {
         const embedding = await createEmbedding(search_value);
-        const cosineSimilarityThreshold = process.env.COSINE_SIMILARITY_THRESHOLD;
+        const notesSimilarityThreshold = notes_similarity_threshold && typeof notes_similarity_threshold === 'string'
+            ? +notes_similarity_threshold
+            : 0.8;
 
         const result = await pool.query(
             `SELECT text, date, id
             FROM notes
             WHERE user_email=$1 AND (1 - (embedding <=> $2::numeric[]::vector(1536))) >= $3;`,
-            [user_email, embedding, cosineSimilarityThreshold]
+            [user_email, embedding, notesSimilarityThreshold]
         );
 
         notes = result?.rows || [];
@@ -96,12 +97,16 @@ router.get('/search', async (req, res) => {
             notes,
             aiResponse,
         });
-        
+
         return;
     }
 
     try {
-        aiResponse = await createAiSearchResponse(search_value, notes) || "";
+        const aiResponseTemperature = ai_response_temperature && !isNaN(+ai_response_temperature)
+            ? +ai_response_temperature
+            : 0.7;
+
+        aiResponse = await createAiSearchResponse(search_value, notes, aiResponseTemperature) || "";
     } catch (err) {
         const message = aiResponseErrorHandler(err.response);
 
@@ -134,10 +139,7 @@ router.get('/', async (req, res) => {
         );
         res.json(allNotes.rows);
     } catch (err) {
-        res.json({
-            error: err.message
-        });
-        console.error(err.message);
+        handleError(err, res);
     }
 });
 
@@ -172,10 +174,7 @@ router.put('/:id', async (req, res) => {
             return;
         }
 
-        res.json({
-            error: err.message
-        });
-        console.error(err.message);
+        handleError(err, res);
     }
 });
 
@@ -191,10 +190,7 @@ router.delete('/:id', async (req, res) => {
             [id]);
         res.json(restOfNotes.rows);
     } catch (err) {
-        res.json({
-            error: err.message
-        });
-        console.error(err.message);
+        handleError(err, res);
     }
 });
 

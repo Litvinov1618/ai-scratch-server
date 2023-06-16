@@ -1,10 +1,10 @@
 const formatDate = require("./formatDate");
 const openai = require("./openai");
 
-const createAiSearchResponse = async (searchValue, notes) => {
+const createAiSearchResponse = async (searchValue, notes, temperature) => {
     const result = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
-        temperature: 0.7,
+        temperature,
         max_tokens: 1000,
         messages: [
             {
