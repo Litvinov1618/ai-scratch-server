@@ -4,8 +4,8 @@ require('dotenv').config();
 const LOCAL_SERVER_SETTINGS = {
     user: process.env.LOCAL_SERVER_USER,
     password: process.env.LOCAL_SERVER_PASSWORD,
-    host: 'localhost',
-    port: 5432,
+    host: process.env.LOCAL_SERVER_HOST,
+    port: process.env.LOCAL_SERVER_PORT ? +process.env.LOCAL_SERVER_PORT : 5432,
     database: process.env.LOCAL_SERVER_DB,
 };
 
