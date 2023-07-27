@@ -20,7 +20,6 @@ const createAiSearchResponse = async (searchValue, notes, temperature) => {
                 role: "assistant",
                 content: `Adam's birthday is on 4th July`,
             },
-
             {
                 role: "user",
                 content: `Question: Where I was 9th October? Current Date: 1 Aug 2023 11:00 AM Notes: 1. Date: 9 Oct 2023, 2:00 PM Text: "Dark Knight" is amazing movie! 2. Date: 9 May 2023, 2:10 PM Text: Bacca coffee is amazing place, need to return soon 3. Date: 2 Oct 2023, 2:00 PM Text: Adam's Birthday: 04/07/1990`,

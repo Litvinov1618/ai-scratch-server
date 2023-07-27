@@ -1,8 +1,6 @@
 const Pool = require('pg').Pool;
 require('dotenv').config();
 
-// TODO: Find better solution
-
 const LOCAL_SERVER_SETTINGS = {
     user: process.env.LOCAL_SERVER_USER,
     password: process.env.LOCAL_SERVER_PASSWORD,

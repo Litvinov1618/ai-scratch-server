@@ -4,7 +4,9 @@ CREATE TABLE notes(
     id SERIAL PRIMARY KEY,
     text TEXT,
     date BIGINT,
-    EMBEDDING VECTOR(1536)
+    embedding VECTOR(1536),
+    user_email VARCHAR(255),
+    delta JSON,
 );
 
 CREATE TABLE user_settings (
