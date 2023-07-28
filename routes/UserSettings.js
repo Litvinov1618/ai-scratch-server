@@ -36,9 +36,7 @@ router.get('/:email', async (req, res) => {
             [email]
         );
 
-        res.json(userSettings.rows[0] || {
-            error: 'No user settings found',
-        });
+        res.json(userSettings.rows[0] || {});
     } catch (err) {
         handleError(err, res);
     }
