@@ -11,14 +11,16 @@ const router = express.Router();
 router.post('/', async (req, res) => {
     try {
         const {
+            text,
             date,
+            delta,
             user_email
         } = req.body;
 
         const newNote = await pool.query(
-            `INSERT INTO notes (date, user_email) VALUES($1, $2)
-            RETURNING id, text, date, user_email;`,
-            [date, user_email]
+            `INSERT INTO notes (text, date, delta, user_email) VALUES($1, $2, $3, $4)
+            RETURNING id, text, date, delta, user_email;`,
+            [text, date, delta, user_email]
         );
 
         res.json(newNote.rows[0]);
@@ -55,16 +57,22 @@ router.get('/search', async (req, res) => {
     }
 
     try {
-        const embedding = await createEmbedding(search_value);
+        // const embedding = await createEmbedding(search_value);
         const notesSimilarityThreshold = notes_similarity_threshold && typeof notes_similarity_threshold === 'string'
             ? +notes_similarity_threshold
             : 0.8;
 
+        // const result = await pool.query(
+        //     `SELECT text, date, id
+        //     FROM notes
+        //     WHERE user_email=$1 AND (1 - (embedding <=> $2::numeric[]::vector(1536))) >= $3;`,
+        //     [user_email, embedding, notesSimilarityThreshold]
+        // );
         const result = await pool.query(
             `SELECT text, date, id
             FROM notes
-            WHERE user_email=$1 AND (1 - (embedding <=> $2::numeric[]::vector(1536))) >= $3;`,
-            [user_email, embedding, notesSimilarityThreshold]
+            WHERE user_email=$1`,
+            [user_email]
         );
 
         notes = result?.rows || [];
@@ -101,24 +109,24 @@ router.get('/search', async (req, res) => {
         return;
     }
 
-    try {
-        const aiResponseTemperature = ai_response_temperature && !isNaN(+ai_response_temperature)
-            ? +ai_response_temperature
-            : 0.7;
+    // try {
+    //     const aiResponseTemperature = ai_response_temperature && !isNaN(+ai_response_temperature)
+    //         ? +ai_response_temperature
+    //         : 0.7;
 
-        aiResponse = await createAiSearchResponse(search_value, notes, aiResponseTemperature) || "";
-    } catch (err) {
-        const message = aiResponseErrorHandler(err.response);
+    //     aiResponse = await createAiSearchResponse(search_value, notes, aiResponseTemperature) || "";
+    // } catch (err) {
+    //     const message = aiResponseErrorHandler(err.response);
 
-        console.error(err.response.status, err.response.data);
-        res.json({
-            notes,
-            error: message,
-            aiResponse,
-        });
+    //     console.error(err.response.status, err.response.data);
+    //     res.json({
+    //         notes,
+    //         error: message,
+    //         aiResponse,
+    //     });
 
-        return;
-    }
+    //     return;
+    // }
 
     res.json({
         notes,
@@ -155,12 +163,17 @@ router.put('/:id', async (req, res) => {
             date,
         } = req.body;
 
-        const embedding = await createEmbedding(text);
+        // const embedding = await createEmbedding(text);
 
+        // const updatedNotes = await pool.query(
+        //     `UPDATE notes SET text = $1, date = $2, embedding = $3::numeric[]::vector(1536), delta = $4
+        //     WHERE id = $5 RETURNING id, text, date;`,
+        //     [text, date, embedding, delta, id]
+        // );
         const updatedNotes = await pool.query(
-            `UPDATE notes SET text = $1, date = $2, embedding = $3::numeric[]::vector(1536), delta = $5
+            `UPDATE notes SET text = $1, date = $2, delta = $3
             WHERE id = $4 RETURNING id, text, date;`,
-            [text, date, embedding, id, delta]
+            [text, date, delta, id]
         );
 
         res.json(updatedNotes.rows);
